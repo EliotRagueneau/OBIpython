@@ -1,0 +1,160 @@
+>Sequence
+1797	1477	CDS
+			protein_id	lcl|ORF53
+			product	unnamed protein
+2641	3579	CDS
+			protein_id	lcl|ORF1
+			product	unnamed protein
+3589	4308	CDS
+			protein_id	lcl|ORF2
+			product	unnamed protein
+4293	4634	CDS
+			protein_id	lcl|ORF20
+			product	unnamed protein
+6629	5046	CDS
+			protein_id	lcl|ORF39
+			product	unnamed protein
+5493	5822	CDS
+			protein_id	lcl|ORF21
+			product	unnamed protein
+6806	7645	CDS
+			protein_id	lcl|ORF10
+			product	unnamed protein
+7737	9722	CDS
+			protein_id	lcl|ORF22
+			product	unnamed protein
+9948	10625	CDS
+			protein_id	lcl|ORF23
+			product	unnamed protein
+10622	11551	CDS
+			protein_id	lcl|ORF11
+			product	unnamed protein
+11117	10800	CDS
+			protein_id	lcl|ORF38
+			product	unnamed protein
+11457	12275	CDS
+			protein_id	lcl|ORF24
+			product	unnamed protein
+12319	13512	CDS
+			protein_id	lcl|ORF3
+			product	unnamed protein
+14923	13589	CDS
+			protein_id	lcl|ORF48
+			product	unnamed protein
+15999	15079	CDS
+			protein_id	lcl|ORF52
+			product	unnamed protein
+18469	16124	CDS
+			protein_id	lcl|ORF47
+			product	unnamed protein
+18883	18476	CDS
+			protein_id	lcl|ORF46
+			product	unnamed protein
+19181	18831	CDS
+			protein_id	lcl|ORF37
+			product	unnamed protein
+18991	19308	CDS
+			protein_id	lcl|ORF4
+			product	unnamed protein
+19305	20117	CDS
+			protein_id	lcl|ORF25
+			product	unnamed protein
+20205	22802	CDS
+			protein_id	lcl|ORF26
+			product	unnamed protein
+22877	23944	CDS
+			protein_id	lcl|ORF12
+			product	unnamed protein
+24913	24344	CDS
+			protein_id	lcl|ORF45
+			product	unnamed protein
+24777	26003	CDS
+			protein_id	lcl|ORF27
+			product	unnamed protein
+26439	26134	CDS
+			protein_id	lcl|ORF51
+			product	unnamed protein
+26489	28234	CDS
+			protein_id	lcl|ORF13
+			product	unnamed protein
+27858	27454	CDS
+			protein_id	lcl|ORF50
+			product	unnamed protein
+28288	28794	CDS
+			protein_id	lcl|ORF5
+			product	unnamed protein
+29304	29669	CDS
+			protein_id	lcl|ORF28
+			product	unnamed protein
+29676	30398	CDS
+			protein_id	lcl|ORF29
+			product	unnamed protein
+30395	31750	CDS
+			protein_id	lcl|ORF14
+			product	unnamed protein
+31974	34043	CDS
+			protein_id	lcl|ORF30
+			product	unnamed protein
+32890	32546	CDS
+			protein_id	lcl|ORF44
+			product	unnamed protein
+33664	33305	CDS
+			protein_id	lcl|ORF43
+			product	unnamed protein
+35555	34080	CDS
+			protein_id	lcl|ORF36
+			product	unnamed protein
+35662	36765	CDS
+			protein_id	lcl|ORF6
+			product	unnamed protein
+36753	37838	CDS
+			protein_id	lcl|ORF31
+			product	unnamed protein
+37279	36893	CDS
+			protein_id	lcl|ORF42
+			product	unnamed protein
+38020	40302	CDS
+			protein_id	lcl|ORF7
+			product	unnamed protein
+39064	38741	CDS
+			protein_id	lcl|ORF41
+			product	unnamed protein
+41286	40525	CDS
+			protein_id	lcl|ORF49
+			product	unnamed protein
+41382	42608	CDS
+			protein_id	lcl|ORF32
+			product	unnamed protein
+42605	43519	CDS
+			protein_id	lcl|ORF15
+			product	unnamed protein
+43506	44582	CDS
+			protein_id	lcl|ORF33
+			product	unnamed protein
+44564	45367	CDS
+			protein_id	lcl|ORF16
+			product	unnamed protein
+45376	46263	CDS
+			protein_id	lcl|ORF8
+			product	unnamed protein
+46265	47068	CDS
+			protein_id	lcl|ORF17
+			product	unnamed protein
+46828	46499	CDS
+			protein_id	lcl|ORF40
+			product	unnamed protein
+47945	47178	CDS
+			protein_id	lcl|ORF35
+			product	unnamed protein
+48056	48847	CDS
+			protein_id	lcl|ORF18
+			product	unnamed protein
+48461	48153	CDS
+			protein_id	lcl|ORF34
+			product	unnamed protein
+48979	49710	CDS
+			protein_id	lcl|ORF9
+			product	unnamed protein
+49697	49999	CDS
+			protein_id	lcl|ORF19
+			product	unnamed protein
