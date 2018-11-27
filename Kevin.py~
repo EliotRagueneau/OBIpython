@@ -15,7 +15,7 @@ def get_features(txt: str) -> str:
                 string of features
         """
     # Voir package builtin re : peut être utile ici
-    print("Théo est une grosse merde !")
+    pass
 
 
 def get_genes(features: str) -> [dict]:
