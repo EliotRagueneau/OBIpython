@@ -1,22 +1,7 @@
 from typing import *  # Permet de préciser le type du contenu des listes et dictionnaires
 
 
-class ORF:
-    """Open Reading Frame
-
-        Defined by:
-                start: start position (in bp)
-                stop: stop position (in bp)
-                frame: frame (1, 2, 3,- 1, -2, or -3)
-                length: gene length (in bp)
-                name: gene name if available. By default, ‘unknown’.
-                protein: translated protein sequence if available. By default, ‘xxx’.
-                product: product name if available. By default, ‘unknown’.
-        """
-    pass
-
-
-def find_orf(seq: str, threshold: int, code_table_id: int) -> [ORF]:
+def find_orf(seq: str, threshold: int, code_table_id: int) -> [dict]:
     """Give a list of all ORF in the sequence if they are grater than the threshold
 
             This function is written by .
@@ -61,7 +46,7 @@ def get_lengths(orf_list: list) -> [int]:
     pass
 
 
-def get_longest_orf(orf_list: List[ORF]) -> ORF:
+def get_longest_orf(orf_list: List[dict]) -> dict:
     """Give the longest orf from a list of orf
 
             This function is written by .
@@ -75,7 +60,7 @@ def get_longest_orf(orf_list: List[ORF]) -> ORF:
     pass
 
 
-def get_top_longest_orf(orf_list: List[ORF], value: float) -> [ORF]:
+def get_top_longest_orf(orf_list: List[dict], value: float) -> [dict]:
     """Return the value% top longest orfs from a list of orf
 
             This function is written by .
@@ -172,7 +157,7 @@ def get_features(txt: str) -> str:
     pass
 
 
-def get_genes(features: str) -> [ORF]:
+def get_genes(features: str) -> [dict]:
     """Extract gene and CDS data from their section inside features table
 
             This function is written by .
@@ -187,7 +172,7 @@ def get_genes(features: str) -> [ORF]:
     pass
 
 
-def read_gen_bank(filename: str) -> Dict[str: str, str: List[ORF]]:
+def read_gen_bank(filename: str) -> Dict[str: str, str: List[dict]]:
     """Parse a GenBank file
 
             This function is written by .
@@ -209,7 +194,7 @@ def read_gen_bank(filename: str) -> Dict[str: str, str: List[ORF]]:
                             organism: organism
                             codeTableID: NCBI genetic code table identifier 
                             
-                    list of gene = ORF (either as ORF or as dict)
+                    list of gene = ORF (dict)
                             start: start position (in bp)
                             stop: stop position (in bp)
                             frame: frame (1, 2, 3,- 1, -2, or -3)
