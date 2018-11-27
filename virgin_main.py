@@ -45,6 +45,7 @@ def get_lengths(orf_list: list) -> [int]:
         """
     pass
 
+
 # blalba
 def get_longest_orf(orf_list: List[dict]) -> dict:
     """Give the longest orf from a list of orf
@@ -172,7 +173,7 @@ def get_genes(features: str) -> [dict]:
     pass
 
 
-def read_gen_bank(filename: str) -> Dict[str: str, str: List[dict]]:
+def read_gen_bank(filename: str) -> Dict[str, Union[str, List[dict]]]:
     """Parse a GenBank file
 
             This function is written by .

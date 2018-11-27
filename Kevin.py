@@ -33,7 +33,7 @@ def get_genes(features: str) -> [dict]:
     pass
 
 
-def read_gen_bank(filename: str) -> Dict[str: str, str: List[dict]]:
+def read_gen_bank(filename: str) -> Dict[str, Union[str, List[dict]]]:
     """Parse a GenBank file
 
             This function is written by Kévin Merchadou.
