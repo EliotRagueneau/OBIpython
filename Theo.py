@@ -31,7 +31,14 @@ def reversed_complement(dna_seq):
             Returns:
                 reversed complement DNA sequence
         """
+    complement_seq=[]
+    dna_seq=dna_seq.upper()
+    complement_dict={"A":"T","C":"G","G":"C","T":"A"}
     
+    for nucleotide in dna_seq[::-1]:
+        complement_seq.append(complement_dict[nucleotide])
+        
+    return "".join(complement_seq)
 
 
 def find_orf(seq: str, threshold: int, code_table_id: int) -> [dict]:
