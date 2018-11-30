@@ -13,11 +13,8 @@ def read_flat_file(filename: str) -> str:
             Returns:
                 string of the whole file (with \n)
         """
-       
-    fichier=open(filename,"r")
-    txt = fichier.read()
-    fichier.close()
-    return txt # ← 'LOCUS       NM_000518 ' ...
+    # Voir with statements sur Sam et Max
+    pass
 
 
 def reversed_complement(dna_seq: str) -> str:
