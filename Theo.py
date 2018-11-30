@@ -2,7 +2,7 @@ from typing import *
 from eliot_main import get_genetic_code, write_csv, read_csv
 
 
-def read_flat_file(filename: str) -> str:
+def read_flat_file(filename):
     """Load a file in memory by returning a string
 
             This function is written by Théo Gauvrit.
@@ -20,10 +20,10 @@ def read_flat_file(filename: str) -> str:
     return txt # ← 'LOCUS       NM_000518 ' ...
 
 
-def reversed_complement(dna_seq: str) -> str:
+def reversed_complement(dna_seq):
     """Return the reversed complement of the given DNA sequence
 
-            This function is written by .
+            This function is written by Théo GAUVRIT.
 
             Args:
                 dna_seq: DNA sequence to be reversed.
@@ -31,7 +31,7 @@ def reversed_complement(dna_seq: str) -> str:
             Returns:
                 reversed complement DNA sequence
         """
-    pass
+    
 
 
 def find_orf(seq: str, threshold: int, code_table_id: int) -> [dict]:
