@@ -18,6 +18,7 @@ def get_features(txt: str) -> str:
     print("Théo est une grosse merde !")
 
 
+
 def get_genes(features: str) -> [dict]:
     """Extract gene and CDS data from their section inside features table
 

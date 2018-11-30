@@ -270,13 +270,16 @@ class GenBank:
         return GenBank(filename)
 
 
-if __name__ == '__main__':
+def read_fasta(filename: str) -> str:
     dna = ""
-    with open("influenza.fasta", 'r') as fasta:
+    with open(filename, 'r') as fasta:
         for fasta_line in fasta:
             if fasta_line[0] != ">":
                 dna += fasta_line.strip()
 
+
+if __name__ == '__main__':
+    dna = read_fasta("influenza.fasta")
     list_of_orf = find_orf(dna[:50001], 300, 11)
     list_of_orf.sort(key=lambda orf: orf.start, reverse=True)
     print(get_lengths(list_of_orf))
