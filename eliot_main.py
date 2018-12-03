@@ -4,36 +4,22 @@ from typing import *
 class ORF:
     """Open Reading Frame defined by start and stop nucleotide"""
 
-    def __init__(self, start: int, stop: int, code_table_id: int, protein: str, frame: str):
-        ##########################
-        # À corriger / Améliorer #
-        ##########################
-        self.strand = strand
-        if self.strand == "+":
-            self.start = start
-            self.stop = stop
-        else:
-            self.start = len(source) - start
-            self.stop = len(source) - stop
-        self.code_table = code_table_id
+    def __init__(self, start: int, stop: int, frame: int, protein: str = "xxx", product: str = "xxx",
+                 name: str = "xxx"):
+        self.start = start
+        self.stop = stop
+
+        self.frame = frame
         self.protein = protein
         self.length = abs(self.stop - self.start)
-        self.product = None  # A rajouter
-        self.name = None  # A rajouter
+        self.product = product
+        self.name = name
 
     def __len__(self):
         return self.length
 
     def __repr__(self):
-        return "{} : {}..{}".format(self.strand, self.start, self.stop)
-
-    def as_dict(self):
-        return {"strand": self.strand,
-                "start": self.start,
-                "stop": self.stop,
-                "transl_table": self.code_table,
-                "protein": self.protein
-                }
+        return "{} : {}..{} --> {}".format(self.name, self.start, self.stop, self.product)
 
 
 def find_orf(seq: str, threshold: int, code_table_id: int) -> [ORF]:
@@ -71,18 +57,16 @@ def find_orf(seq: str, threshold: int, code_table_id: int) -> [ORF]:
                     if aa == "*":
                         if i - init > threshold and i not in list_stop:  # Seulement pour n'avoir que les ORFs maximum
                             list_stop.append(i)
-                            orf_list.append(ORF(seq,
-                                                start=init,
+                            orf_list.append(ORF(start=init,
                                                 stop=i,
-                                                code_table_id=code_table_id,
-                                                protein=prot,
-                                                strand=strand))
+                                                frame=init % 3 + 1,
+                                                protein=prot))
+                            break
+                        prot += aa
+                    else:
                         break
-                    prot += aa
-                else:
-                    break
 
-    return orf_list
+        return orf_list
 
 
 def get_genetic_code(ncbi_id: int) -> Tuple[dict, dict]:
@@ -197,22 +181,40 @@ class GenBank:
                         list of ORF (either as ORF or as dict)
                 """
         text = self.read_flat_file(filename)
+        list_lines = text.split('\n')
         features = self.get_features(text)
         self.genes = self.get_genes(features)
+        for line in list_lines:
+            if line[:12] == "DEFINITION  ":
+                self.description = line[12:]
+            elif line[:12] == "VERSION     ":
+                self.id = line[12:]
+            elif line[:12] == "SOURCE      ":
+                self.organism = line[12:]
+            elif line[:21] == "     source          ":
+                self.length = line.split('..')[1]
+            elif line[:31] == '                     /mol_type=':
+                self.gbtype = line.split('"')[1]
+                if "DNA" in self.gbtype:
+                    self.type = "dna"
+                elif "RNA" in self.gbtype:
+                    self.type = "rna"
+                # Problème pour les protéines : pas de mol_type dans le cas de protéines
+            elif line[:34] == "                     /transl_table":
+                self.code_table_id = int(line.split("=")[-1])
+                break
+
+        for i in range(len(list_lines) - 1, -1, -1):
+            if list_lines[i][:6] == "ORIGIN":
+                self.data = ''.join([''.join(line.split(' ')[-6:]) for line in list_lines[i + 1: -3]])
+
+                break
+            elif i == 0:
+                self.data = "xxx"
+
+    def show_genes(self):
         for orf in self.genes:
             print(orf)
-
-        # if "/transl_table" == line[:13]:
-        #     trans = int(line.split("=")[-1])
-
-        # self.definition = None
-        # self.type = None  # dna, rna, or protein
-        # self.data = None  # only if available otherwise set to ‘xxx’. if seq too large, the entry does not contain data.
-        # self.id = None
-        # self.length = None
-        # self.gbtype = None
-        # self.organism = None
-        # self.code_table_id = None
 
     @staticmethod
     def read_flat_file(filename: str) -> str:
@@ -259,24 +261,22 @@ class GenBank:
                     list of ORF (either as ORF or as dict)
             """
         ls = features.split('\n')
-        list_begin = []
-        list_ending = []
-        list_orf = []
-        list_cds = []
+        cds_begins, cds_begins, cds_ends, list_cds, list_orf = [], [], [], [], []
         cds = False
-        for i in range(len(ls)):
+
+        for i in range(len(ls)):  # Récupération des positions des différentes entrées CDS
             classe = ls[i][:3]
             if classe == "CDS":
                 cds = True
-                list_begin.append(i)
+                cds_begins.append(i)
             elif classe != "   " and cds:
                 cds = False
-                list_ending.append(i)
+                cds_ends.append(i)
 
-        for i in range(len(list_begin)):
-            list_cds.append(ls[list_begin[i]: list_ending[i]])
+        for i in range(len(cds_begins)):  # Récupération des CDS depuis leurs positions dans le fichier
+            list_cds.append(ls[cds_begins[i]: cds_ends[i]])
 
-        for cds in list_cds:
+        for cds in list_cds:  # Création de la liste d'ORF à partir de la liste de CDS du fichier gb
             if cds[0][16:26] == "complement":
                 pos = cds[0][27:].split('..')
                 start = int(pos[0])
@@ -293,19 +293,13 @@ class GenBank:
             for i in range(1, len(cds)):
                 line = cds[i][16:]
                 if "/gene" == line[:5]:
-                    name = line.split('"')[-2]
+                    name = ''.join([x[16:] for x in cds[i:]]).split('"')[1]
                 elif "/product" == line[:8]:
-                    product = line.split('"')[-2]
+                    product = ''.join([x[16:] for x in cds[i:]]).split('"')[1]
                 elif "/translation" == line[:12]:
-                    protein = ''.join([x[16:] for x in cds[i:]]).split('"')[-2]
+                    protein = ''.join([x[16:] for x in cds[i:]]).split('"')[1]
                     break
-            list_orf.append({"start": start,
-                             "stop": stop,
-                             "frame": frame,
-                             "name": name,
-                             "product": product,
-                             "protein": protein
-                             })
+            list_orf.append(ORF(start, stop, frame, protein, product, name))
 
         return list_orf
 
@@ -323,6 +317,9 @@ class GenBank:
             """
         return GenBank(filename)
 
+    def __repr__(self):
+        return "{} : {} of {}".format(self.id, self.gbtype, self.organism)
+
 
 def read_fasta(filename: str) -> str:
     dna = ""
@@ -334,4 +331,8 @@ def read_fasta(filename: str) -> str:
 
 
 if __name__ == '__main__':
-    GenBank("sequence.gb")
+    influ = GenBank("sequence.gb")
+    print(influ)
+    influ.show_genes()
+
+    # another = GenBank("another.gb")

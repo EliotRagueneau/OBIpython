@@ -1,0 +1,89 @@
+LOCUS       KT388711                 982 bp    cRNA    linear   VRL 17-DEC-2015
+DEFINITION  Influenza A virus (A/goose/Taiwan/TNO20/2015(H5N8)) segment 7 cRNA
+            sequence.
+ACCESSION   KT388711
+VERSION     KT388711.1
+KEYWORDS    .
+SOURCE      Influenza A virus (A/goose/Taiwan/TNO20/2015(H5N8))
+  ORGANISM  Influenza A virus (A/goose/Taiwan/TNO20/2015(H5N8))
+            Viruses; ssRNA viruses; ssRNA negative-strand viruses;
+            Orthomyxoviridae; Influenzavirus A.
+REFERENCE   1  (bases 1 to 982)
+  AUTHORS   Huang,P.Y., Lee,C.D., Yip,C.H., Cheung,C.L., Yu,G., Lam,T.T.,
+            Smith,D.K., Zhu,H. and Guan,Y.
+  TITLE     Genetic characterization of highly pathogenic H5 influenza viruses
+            from poultry in Taiwan, 2015
+  JOURNAL   Infect. Genet. Evol. 38, 96-100 (2015)
+   PUBMED   26690663
+  REMARK    Publication Status: Available-Online prior to print
+REFERENCE   2  (bases 1 to 982)
+  AUTHORS   Huang,P.Y., Lee,C.C., Yip,C.H., Cheung,C.L., Yu,G., Lam,T.Y.,
+            Smith,D.K., Zhu,H. and Guan,Y.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (14-AUG-2015) Centre of Influenza Research, School of
+            Public Health, The University of Hong Kong, Laboratory Block, LKS
+            Faculty of Medicine Building, 21 Sassoon Road, Pokfulam, Hong Kong
+            SAR, China
+COMMENT     GenBank Accession Numbers KT388705-KT388712 represent sequences
+            from the 8 segments of Influenza A virus
+            (A/goose/Taiwan/TNO20/2015(H5N8)).
+            
+            ##Assembly-Data-START##
+            Assembly Method       :: Lasergene v. 9.0
+            Sequencing Technology :: Sanger dideoxy sequencing; 454; Illumina
+            ##Assembly-Data-END##
+FEATURES             Location/Qualifiers
+     source          1..982
+                     /organism="Influenza A virus
+                     (A/goose/Taiwan/TNO20/2015(H5N8))"
+                     /mol_type="viral cRNA"
+                     /strain="A/goose/Taiwan/TNO20/2015"
+                     /serotype="H5N8"
+                     /isolation_source="oropharyngeal"
+                     /host="goose"
+                     /db_xref="taxon:1701790"
+                     /segment="7"
+                     /country="Taiwan"
+                     /collection_date="17-Jan-2015"
+                     /note="passage details: E1"
+     gene            1..982
+                     /gene="M2"
+     CDS             join(1..26,715..982)
+                     /gene="M2"
+                     /codon_start=1
+                     /product="matrix protein 2"
+                     /protein_id="ALB07774.1"
+                     /translation="MSLLTEVETPTRTEWECRCSDSSDPLVVAANIIGILHLILWILD
+                     RLFFKCIYRRLKYGLKIGPSTEGVPESMREEYRQEQQSAVDVDDGHFVNIELE"
+     gene            1..759
+                     /gene="M1"
+     CDS             1..759
+                     /gene="M1"
+                     /codon_start=1
+                     /product="matrix protein 1"
+                     /protein_id="ALB07773.1"
+                     /translation="MSLLTEVETYVLSIIPSGPLKAEIAQRLEDVFAGKNTDLEALME
+                     WLKTRPILSPLTKGILGFVFTLTVPSERGLQRRRFVQNALNGNGDPNNMDKAVKLYKK
+                     LKREITFHGAKEVALSYSTGALASCMGLIYNRMGTVTTEVAFGLVCATCEQIADSQHR
+                     SHRQMATITNPLIRHENRMVLASTTAKAMEQMAGSSEQASEAMEVANQARQMVQAMRT
+                     IGTHPNSSAGLRDNLLENLQAYQNRMGVQMQRFK"
+ORIGIN      
+        1 atgagtcttc taaccgaggt cgaaacgtac gttctctcta tcatcccgtc aggccccctc
+       61 aaagccgaga tcgcgcagag acttgaagat gtctttgcag ggaaaaacac cgatctcgag
+      121 gctctcatgg agtggctaaa gacaagacca atcctgtcac ctctgactaa agggattttg
+      181 ggatttgtgt tcacgctcac cgtgcccagt gagcgaggac tgcagcgtag acgcttcgtc
+      241 cagaatgccc taaatggaaa tggggatcca aataatatgg ataaggcagt taagctatat
+      301 aagaagctga aaagagagat aacattccat ggggctaagg aggtcgcact tagctactca
+      361 accggtgcac ttgccagctg catgggtctc atatacaaca ggatgggaac ggtgactaca
+      421 gaagtggctt ttggcctagt gtgtgccact tgtgagcaga ttgcagattc acagcatcgg
+      481 tcccacagac agatggcaac catcaccaac ccattaatca gacatgagaa cagaatggtg
+      541 ctggccagca ctacagctaa ggccatggag cagatggcag gatcaagcga gcaggcatca
+      601 gaagccatgg aggttgctaa tcaggccagg cagatggtac aggcaatgag gacaattggg
+      661 actcatccta attctagtgc tggtctgaga gataatcttc ttgaaaattt gcaggcctac
+      721 cagaaccgaa tgggagtgca gatgcagcga ttcaagtgat cctcttgttg ttgccgcaaa
+      781 tatcattggg atcctgcact tgatattgtg gatccttgat cgtcttttct tcaaatgcat
+      841 ttatcgtcgc cttaaatacg gtttgaaaat agggccttct acggaagggg tacctgagtc
+      901 tatgagggaa gagtaccggc aggaacagca gagtgctgtg gatgttgacg atggtcattt
+      961 tgtcaacata gaattggagt aa
+//
+
