@@ -19,7 +19,8 @@ class ORF:
         return self.length
 
     def __repr__(self):
-        return "{} : {}..{} --> {}".format(self.name, self.start, self.stop, self.product)
+        # return "{} : {}..{} --> {}".format(self.name, self.start, self.stop, self.product)
+        return "{} : {}..{} ".format(self.frame, self.start, self.stop)
 
 
 def find_orf(seq: str, threshold: int, code_table_id: int) -> [ORF]:
@@ -45,33 +46,33 @@ def find_orf(seq: str, threshold: int, code_table_id: int) -> [ORF]:
         for i in range(len(strands[strand])):
             if strands[strand][i:i + 3] in start_table:
                 inits.append(i)
-        list_stop = []  # Seulement pour n'avoir que les ORFs maximum
+        # list_stop = []  # Seulement pour n'avoir que les ORFs maximum
         for init in inits:
             prot = ""
             for i in range(init, len(strands[strand]), 3):
                 codon = strands[strand][i: i + 3]
                 if len(codon) == 3:
                     aa = transl_table[codon]
-                    print(aa)
                     if aa == "*":
-                        if i - init > threshold and i not in list_stop:  # Seulement pour n'avoir que les ORFs maximum
-                            list_stop.append(i)
-                            if strand == 1:
+                        if i - init > threshold:  # and i not in list_stop:  Seulement pour n'avoir que les ORFs maximum
+                            init += 1
+                            # list_stop.append(i)
+                            if strand > 0:
                                 orf_list.append(ORF(start=init,
-                                                    stop=i,
+                                                    stop=i + 3,
                                                     frame=init % 3 + 1,
                                                     protein=prot))
                             else:
-                                orf_list.append(ORF(start=length - i,
+                                orf_list.append(ORF(start=length - (i + 3),
                                                     stop=length - init,
-                                                    frame=-(init % 3 + 1),
+                                                    frame=-1 * (init % 3) - 1,
                                                     protein=prot))
                             break
-                        prot += aa
-                    else:
-                        break
+                        else:
+                            break
+                    prot += aa
 
-        return orf_list
+    return orf_list
 
 
 def get_genetic_code(ncbi_id: int) -> Tuple[dict, dict]:
@@ -336,10 +337,18 @@ def read_fasta(filename: str) -> str:
 
 
 if __name__ == '__main__':
-    list_orf = find_orf(read_fasta("influenza.fasta"), 92, 11)
-    print(list_orf)
+    list_orf = find_orf(read_fasta("influenza.fasta"), 87, 11)
+
     influenza = GenBank("sequence.gb")
-    # print(influenza)
+    print(list_orf)
+    list_neg = [str(orf) for orf in list_orf if orf.frame < 0 and "504" in str(orf.start)]
+    print(list_neg)
+    # list_repr = [str(x) for x in list_orf]
+
+    # for gene in influenza.genes:
+    #     if str(gene) not in list_repr:
+    #         print(gene)
+
     # print(sum([gene.length for gene in influ.genes]) / len(influ.genes))
     # print(min([gene.length for gene in influ.genes]))
 
