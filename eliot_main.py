@@ -22,6 +22,58 @@ class ORF:
         return "{} : {}..{} --> {}".format(self.name, self.start, self.stop, self.product)
 
 
+def find_orf(seq: str, threshold: int, code_table_id: int) -> [ORF]:
+    """Give a list of all ORF in the sequence if they are grater than the threshold
+
+            This function is written by Eliot Ragueneau.
+
+            Args:
+                seq: Sequence source
+                threshold: Minimum size of the ORF in the list
+                code_table_id: NCBI identifier of the translation table used on this sequence
+
+            Returns:
+                list of ORF
+        """
+    transl_table, start_table = get_genetic_code(code_table_id)
+
+    length = len(seq)
+    strands = {1: seq, -1: reversed_complement(seq)}
+    orf_list = []
+    for strand in strands:
+        inits = []
+        for i in range(len(strands[strand])):
+            if strands[strand][i:i + 3] in start_table:
+                inits.append(i)
+        list_stop = []  # Seulement pour n'avoir que les ORFs maximum
+        for init in inits:
+            prot = ""
+            for i in range(init, len(strands[strand]), 3):
+                codon = strands[strand][i: i + 3]
+                if len(codon) == 3:
+                    aa = transl_table[codon]
+                    print(aa)
+                    if aa == "*":
+                        if i - init > threshold and i not in list_stop:  # Seulement pour n'avoir que les ORFs maximum
+                            list_stop.append(i)
+                            if strand == 1:
+                                orf_list.append(ORF(start=init,
+                                                    stop=i,
+                                                    frame=init % 3 + 1,
+                                                    protein=prot))
+                            else:
+                                orf_list.append(ORF(start=length - i,
+                                                    stop=length - init,
+                                                    frame=-(init % 3 + 1),
+                                                    protein=prot))
+                            break
+                        prot += aa
+                    else:
+                        break
+
+        return orf_list
+
+
 def get_genetic_code(ncbi_id: int) -> Tuple[dict, dict]:
     """Give the initiation codons and the translation table by its id
 
@@ -281,59 +333,6 @@ def read_fasta(filename: str) -> str:
             if fasta_line[0] != ">":
                 dna += fasta_line.strip()
     return dna
-
-
-def find_orf(seq: str, threshold: int, code_table_id: int) -> [ORF]:
-    """Give a list of all ORF in the sequence if they are grater than the threshold
-
-            This function is written by Eliot Ragueneau.
-
-            Args:
-                seq: Sequence source
-                threshold: Minimum size of the ORF in the list
-                code_table_id: NCBI identifier of the translation table used on this sequence
-
-            Returns:
-                list of ORF
-        """
-    transl_table, start_table = get_genetic_code(code_table_id)
-
-    length = len(seq)
-    strands = {1: seq, -1: reversed_complement(seq)}
-    orf_list = []
-    for strand in strands:
-        inits = []
-        for i in range(len(strands[strand])):
-            if strands[strand][i:i + 3] in start_table:
-                inits.append(i)
-
-        list_stop = []  # Seulement pour n'avoir que les ORFs maximum
-        for init in inits:
-            prot = ""
-            for i in range(init, len(strands[strand]), 3):
-                codon = strands[strand][i: i+3]
-                if len(codon) == 3:
-                    aa = transl_table[codon]
-                    if aa == "*":
-                        if i - init > threshold and i not in list_stop:  # Seulement pour n'avoir que les ORFs maximum
-                            list_stop.append(i)
-                            if strand == 1:
-                                orf_list.append(ORF(start=init,
-                                                    stop=i,
-                                                    frame=init % 3 + 1,
-                                                    protein=prot))
-                            else:
-
-                                orf_list.append(ORF(start=length - i,
-                                                    stop=length - init,
-                                                    frame=-(init % 3 + 1),
-                                                    protein=prot))
-                            break
-                        prot += aa
-                    else:
-                        break
-
-        return orf_list
 
 
 if __name__ == '__main__':
