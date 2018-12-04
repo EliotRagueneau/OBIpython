@@ -276,8 +276,6 @@ def read_fasta(filename: str) -> str:
         for fasta_line in fasta:
             if fasta_line[0] != ">":
                 dna += fasta_line.strip()
-    return dna
-
 
 
 if __name__ == '__main__':
