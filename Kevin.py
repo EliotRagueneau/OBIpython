@@ -5,17 +5,19 @@ from Theo import read_flat_file
 
 def get_features(txt: str) -> str:
     """Extract features lines from flat text and return them
-
             This function is written by Kévin Merchadou.
-
             Args:
                 txt: flat text with features to extract
-
             Returns:
                 string of features
         """
-    # Voir package builtin re : peut être utile ici
-    print("Théo est une grosse merde !")
+    conc=txt.split("\n")
+    for i in range(len(conc)):
+        if conc[i]=="FEATURES             Location/Qualifiers":
+            features = "".join(conc[i+1:])
+            break
+    return features
+
 
 
 
@@ -30,7 +32,40 @@ def get_genes(features: str) -> [dict]:
             Returns:
                 list of ORF (either as ORF or as dict)
         """
-    # Voir package builtin re : peut être utile ici
+    list_CDS=[]
+    list_genes=[]
+    bloc=("").join(features.split("          "))
+    bloc_CDS=bloc.split("     ")
+    for ligne in range(len(bloc_CDS)):
+        if bloc_CDS[ligne][0:3]=="CDS":
+            list_CDS.append(ligne)
+    for ligne in range(len(list_CDS)):
+        CDS={"start":None,"stop":None,"frame":None,"length":None,"name":"unknown","protein":"xxx","product":"unknown"}
+        bloc_cleaned=bloc_CDS[list_CDS[ligne]].split("/")
+        if bloc_cleaned[0][6:17]=="complement(":
+            start=int((bloc_cleaned[0][17:].strip()).split("..")[0])
+            inter_stop=(bloc_cleaned[0][17:].strip()).split("..")[1]
+            stop=int(inter_stop[:len(inter_stop)-1])
+            CDS["start"]=start
+            CDS["stop"]=stop
+            CDS["frame"]=1-(start%3)
+            CDS["length"]=stop-start
+        else:
+            start=int((bloc_cleaned[0].strip()).split("..")[0][6:])
+            stop=int((bloc_cleaned[0].strip()).split("..")[1])
+            CDS["start"]=start
+            CDS["stop"]=stop
+            CDS["frame"]=1+(start%3)
+            CDS["length"]=stop-start
+        for ligne2 in range(len(bloc_cleaned)):
+            if bloc_cleaned[ligne2][:5]=="gene=":
+                CDS["name"]=(bloc_cleaned[ligne2][5:].split('"'))[1]
+            elif bloc_cleaned[ligne2][:8]=="product=":
+                CDS["product"]=(bloc_cleaned[ligne2][8:].split('"'))[1]
+            elif bloc_cleaned[ligne2][:12]=="translation=":
+                CDS["protein"]=(bloc_cleaned[ligne2][12:].split('"'))[1]
+        list_genes.append(CDS)
+    return list_genes
     pass
 
 
