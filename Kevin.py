@@ -74,6 +74,19 @@ def get_genes(features: str) -> [dict]:
 
 
 def read_gen_bank(filename: str) -> Dict[str, Union[str, List[dict]]]:
+    Features={"Description":None,"ID":None}
+    ligne=filename.split("\n")
+    for i in range(len(ligne)):
+        mot=ligne[i].split(" ")
+        if mot[0]=="DEFINITION":
+            
+        elif mot[0]=="VERSION":
+            Features["ID"]=mot[6]
+        
+    
+        
+    return concatenation
+    
     """Parse a GenBank file
 
             This function is written by Kévin Merchadou.
@@ -107,3 +120,5 @@ def read_gen_bank(filename: str) -> Dict[str, Union[str, List[dict]]]:
     pass
 
 a=get_genes(get_features(read_flat_file("sequence.gb")))
+b=read_gen_bank(read_flat_file("sequence.gb"))
+print(b[0])
