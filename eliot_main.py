@@ -48,24 +48,24 @@ def find_orf(seq: str, threshold: int, code_table_id: int) -> [ORF]:
                 inits.append(i)
         # list_stop = []  # Seulement pour n'avoir que les ORFs maximum
         for init in inits:
-            prot = ""
-            for i in range(init, len(strands[strand]), 3):
+            prot = "M"
+            for i in range(init + 3, len(strands[strand]), 3):
                 codon = strands[strand][i: i + 3]
                 if len(codon) == 3:
                     aa = transl_table[codon]
                     if aa == "*":
                         if i - init > threshold:  # and i not in list_stop:  Seulement pour n'avoir que les ORFs maximum
-                            init += 1
                             # list_stop.append(i)
                             if strand > 0:
+                                init += 1
                                 orf_list.append(ORF(start=init,
                                                     stop=i + 3,
                                                     frame=init % 3 + 1,
                                                     protein=prot))
                             else:
-                                orf_list.append(ORF(start=length - (i + 3),
+                                orf_list.append(ORF(start=length - (i + 2),
                                                     stop=length - init,
-                                                    frame=-1 * (init % 3) - 1,
+                                                    frame=-1 * (init % 3 + 1),
                                                     protein=prot))
                             break
                         else:
@@ -334,26 +334,43 @@ def read_fasta(filename: str) -> str:
             if fasta_line[0] != ">":
                 dna += fasta_line.strip()
     return dna
-<<<<<<< HEAD
 
-=======
->>>>>>> ceeec9afce1b93e83dfea6a05c7adb2f9b703bcb
+
+def translate(seq):
+    transl_table, start_table = get_genetic_code(11)
+    prot = "M"
+    for i in range(3, len(seq), 3):
+        codon = seq[i: i + 3]
+        if len(codon) == 3:
+            aa = transl_table[codon]
+            prot += aa
+    return prot
+
+
+def complement(seq):
+    complement_dict = {"A": "T", "T": "A", "C": "G", "G": "C"}
+    return "".join([complement_dict[i] for i in seq])
 
 
 if __name__ == '__main__':
-    list_orf = find_orf(read_fasta("influenza.fasta"), 87, 11)
+
+    # for orf in list_orf:
+    #     print(orf.protein)
+    genome = read_fasta("influenza.fasta")
+    # print(len(genome))
+    list_orf = find_orf(genome, 89, 11)
+    # gene = genome[5045:6626]
+    # test = reversed_complement(genome)[len(genome) - 6626: len(genome) - 5046]
+    # print(translate(test))
+    # print("reverse-complement\n", translate(reversed_complement(gene)))
 
     influenza = GenBank("sequence.gb")
-    print(list_orf)
-    list_neg = [str(orf) for orf in list_orf if orf.frame < 0 and "504" in str(orf.start)]
-    print(list_neg)
-    # list_repr = [str(x) for x in list_orf]
-
-    # for gene in influenza.genes:
-    #     if str(gene) not in list_repr:
-    #         print(gene)
-
+    list_prot = [x.protein for x in list_orf]
+    for gene in influenza.genes:
+        if gene.protein not in list_prot:
+            print(gene)
+    #
     # print(sum([gene.length for gene in influ.genes]) / len(influ.genes))
     # print(min([gene.length for gene in influ.genes]))
-
+    #
     # another = GenBank("another.gb")
