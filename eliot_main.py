@@ -63,9 +63,10 @@ def find_orf(seq: str, threshold: int, code_table_id: int) -> [ORF]:
                                                     frame=init % 3 + 1,
                                                     protein=prot))
                             else:
+                                print(-1 * ((init - 1) % 3 + 1))
                                 orf_list.append(ORF(start=length - (i + 2),
                                                     stop=length - init,
-                                                    frame=-1 * (init % 3 + 1),
+                                                    frame=-1 * ((init - 1) % 3 + 1),
                                                     protein=prot))
                             break
                         else:
@@ -189,7 +190,6 @@ class GenBank:
         text = self.read_flat_file(filename)
         list_lines = text.split('\n')
         features = self.get_features(text)
-        self.genes = self.get_genes(features)
         for line in list_lines:
             if line[:12] == "DEFINITION  ":
                 self.description = line[12:]
@@ -198,7 +198,7 @@ class GenBank:
             elif line[:12] == "SOURCE      ":
                 self.organism = line[12:]
             elif line[:21] == "     source          ":
-                self.length = line.split('..')[1]
+                self.length = int(line.split('..')[1])
             elif line[:31] == '                     /mol_type=':
                 self.gbtype = line.split('"')[1]
                 if "DNA" in self.gbtype:
@@ -209,6 +209,8 @@ class GenBank:
             elif line[:34] == "                     /transl_table":
                 self.code_table_id = int(line.split("=")[-1])
                 break
+
+        self.genes = self.get_genes(features)
 
         for i in range(len(list_lines) - 1, -1, -1):
             if list_lines[i][:6] == "ORIGIN":
@@ -254,8 +256,7 @@ class GenBank:
             if ls[i][:8] == "FEATURES":
                 return '\n'.join([x[5:] for x in ls[i + 1:]])
 
-    @staticmethod
-    def get_genes(features: str) -> [ORF]:
+    def get_genes(self, features: str) -> [ORF]:
         """Extract gene and CDS data from their section inside features table
 
                 This function is written by .
@@ -287,7 +288,8 @@ class GenBank:
                 pos = cds[0][27:].split('..')
                 start = int(pos[0])
                 stop = int(pos[1].strip(')'))
-                frame = -((start % 3) + 1)
+                frame = -((self.length - start) % 3 + 1)
+                print(frame)
             else:
                 pos = [int(x) for x in cds[0][16:].split('..')]
                 start = int(pos[0])
@@ -365,9 +367,9 @@ if __name__ == '__main__':
     # print("reverse-complement\n", translate(reversed_complement(gene)))
 
     influenza = GenBank("sequence.gb")
-    list_prot = [x.protein for x in list_orf]
+    list_prot = [str(x) for x in list_orf]
     for gene in influenza.genes:
-        if gene.protein not in list_prot:
+        if str(gene) not in list_prot:
             print(gene)
     #
     # print(sum([gene.length for gene in influ.genes]) / len(influ.genes))
