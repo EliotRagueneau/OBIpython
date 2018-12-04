@@ -1,68 +1,95 @@
+#coding: utf8
+
 from typing import *
 from eliot_main import get_genetic_code, write_csv, read_csv
 from Theo import read_flat_file
 
 
-def get_features(txt: str) -> str:
+def get_features(txt):
     """Extract features lines from flat text and return them
-
             This function is written by Kévin Merchadou.
-
             Args:
                 txt: flat text with features to extract
-
             Returns:
                 string of features
         """
-    # Voir package builtin re : peut être utile ici
-    print("Théo est une grosse merde !")
+    conc=txt.split("\n")
+    for i in range(len(conc)):
+        if conc[i]=="FEATURES             Location/Qualifiers":
+            features = "".join(conc[i+1:])
+            break
+    return features
+
+
+def get_genes(features):
+    list_CDS=[]
+    bloc=("").join(features.split("          "))
+    bloc_cleaned=bloc.split("     ")
+    for i in range(len(bloc_cleaned)):
+        if bloc_cleaned[i][0:3]=="CDS":
+            list_CDS.append(i)
+    return list_CDS
+    
 
 
 
-def get_genes(features: str) -> [dict]:
-    """Extract gene and CDS data from their section inside features table
-
-            This function is written by Kévin Merchadou.
-
-            Args:
-                features: text with gene to extract
-
-            Returns:
-                list of ORF (either as ORF or as dict)
-        """
-    # Voir package builtin re : peut être utile ici
-    pass
 
 
-def read_gen_bank(filename: str) -> Dict[str, Union[str, List[dict]]]:
-    """Parse a GenBank file
+                   
+    # for line in features.split('\n'):
+    #     if line[5:8] == "CDS":
+    #         pos = line.split("             ")[1].split("..")
+    #         product = line+7[22].split("=")[1]
+    #         protein = 
+    #         new_cds = {"start": pos[0], "stop" : pos[1], "frame" : pos[0]%3+1 "length": pos[1] - pos[0],"name" : "unknown", "protein" : "xxx", "product" : "unknown"}
+    #     elif line[5] != " " and len(new_cds) > 1:
+    #         list_genes.append(new_cds)
+    #     else:
+    #         new_cds = line[22].split('=')
+            
+            
+            
 
-            This function is written by Kévin Merchadou.
 
-            Args:
-                filename: .gb file to parse
+#def read_gen_bank(filename: str) -> Dict[str, Union[str, List[dict]]]:
+    # """Parse a GenBank file
 
-            Returns:
-                dictionary of :
+    #         This function is written by Kévin Merchadou.
 
-                    features:
-                            description: entry title (genbank descriptor DEFINITION)
-                            type: myBio keywords only - dna, rna, or protein
-                            data: sequence data only if available otherwise set to ‘xxx’. When the sequence is too large
-                                  the entry does not contain data.
-                            ID: Identifier (locus)
-                            length: sequence length
-                            gbtype: molecule type as described in a genbank entry.
-                            organism: organism²
-                            codeTableID: NCBI genetic code table identifier
+    #         Args:
+    #             filename: .gb file to parse
 
-                    list of gene = ORF (dict)
-                            start: start position (in bp)
-                            stop: stop position (in bp)
-                            frame: frame (1, 2, 3,- 1, -2, or -3)
-                            length: gene length (in bp)
-                            name: gene name if available. By default, ‘unknown’.
-                            protein: translated protein sequence if available. By default, ‘xxx’.
-                            product: product name if available. By default, ‘unknown’.
-        """
-    pass
+    #         Returns:
+    #             dictionary of :
+
+    #                 features:
+    #                         description: entry title (genbank descriptor DEFINITION)
+    #                         type: myBio keywords only - dna, rna, or protein
+    #                         data: sequence data only if available otherwise set to ‘xxx’. When the sequence is too large
+    #                               the entry does not contain data.
+    #                         ID: Identifier (locus)
+    #                         length: sequence length
+    #                         gbtype: molecule type as described in a genbank entry.
+    #                         organism: organism²
+    #                         codeTableID: NCBI genetic code table identifier
+
+    #                 list of gene = ORF (dict)
+    #                         start: start position (in bp)
+    #                         stop: stop position (in bp)
+    #                         frame: frame (1, 2, 3,- 1, -2, or -3)
+    #                         length: gene length (in bp)
+    #                         name: gene name if available. By default, ‘unknown’.
+    #                         protein: translated protein sequence if available. By default, ‘xxx’.
+    #                         product: product name if available. By default, ‘unknown’.
+    #     """
+#    pass
+
+features=get_features(read_flat_file("sequence.gb"))
+bloc=("").join(features.split("          "))
+bloc_CDS=bloc.split("     ")
+bloc_cleaned=bloc_CDS[7].split("/")
+a=(bloc_cleaned[9][12:].split('"')[1]).split(" ")
+print(a)
+# a=(bloc_cleaned[0][17:].strip()).split("..")[1]
+# print(a)
+# print(int(a[:len(a)-1]))

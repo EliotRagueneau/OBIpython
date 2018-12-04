@@ -63,11 +63,7 @@ def get_genes(features: str) -> [dict]:
             elif bloc_cleaned[ligne2][:8]=="product=":
                 CDS["product"]=(bloc_cleaned[ligne2][8:].split('"'))[1]
             elif bloc_cleaned[ligne2][:12]=="translation=":
-                sequence=(bloc_cleaned[ligne2][12:].split('"')[1]).split(" ")
-                protein=""
-                for aa in range(len(sequence)):
-                    protein=protein+sequence[aa]
-                    CDS["protein"]=protein
+                CDS["protein"]=(bloc_cleaned[ligne2][12:].split('"'))[1]
         list_genes.append(CDS)
     return list_genes
     pass
@@ -105,5 +101,3 @@ def read_gen_bank(filename: str) -> Dict[str, Union[str, List[dict]]]:
                             product: product name if available. By default, ‘unknown’.
         """
     pass
-
-a=get_genes(get_features(read_flat_file("sequence.gb")))
