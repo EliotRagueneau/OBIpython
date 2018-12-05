@@ -74,18 +74,20 @@ def get_genes(features: str) -> [dict]:
 
 
 def read_gen_bank(filename: str) -> Dict[str, Union[str, List[dict]]]:
-    Features={"Description":None,"ID":None}
+    Features={"Description":None,"ID":None,"length":None,"organism":None}
     ligne=filename.split("\n")
     for i in range(len(ligne)):
         mot=ligne[i].split(" ")
-        if mot[0]=="DEFINITION":
-            
-        elif mot[0]=="VERSION":
-            Features["ID"]=mot[6]
-        
-    
-        
-    return concatenation
+        for j in range(len(mot)):
+            if mot[j]=="DEFINITION":
+                Features["Description"]=" ".join(mot[j+2:])    
+            elif mot[j]=="VERSION":
+                Features["ID"]=mot[j+5]
+            elif mot[j]=="bp":
+                Features["length"]=mot[j-1]+" bp"
+            elif mot[j]=="ORGANISM":
+                Features["organism"]=" ".join(mot[j+2:])
+    return Features
     
     """Parse a GenBank file
 
@@ -121,4 +123,4 @@ def read_gen_bank(filename: str) -> Dict[str, Union[str, List[dict]]]:
 
 a=get_genes(get_features(read_flat_file("sequence.gb")))
 b=read_gen_bank(read_flat_file("sequence.gb"))
-print(b[0])
+print(b)
