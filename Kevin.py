@@ -74,8 +74,10 @@ def get_genes(features: str) -> [dict]:
 
 
 def read_gen_bank(filename: str) -> Dict[str, Union[str, List[dict]]]:
-    Features={"Description":None,"ID":None,"length":None,"organism":None}
-    ligne=filename.split("\n")
+    Features={"Description":None,"ID":None,"length":None,"organism":None,"type":None,"genes":None,"sequence":None}
+    Genes=get_genes(get_features(read_flat_file(filename)))
+    String=read_flat_file(filename)
+    ligne=String.split("\n")
     for i in range(len(ligne)):
         mot=ligne[i].split(" ")
         for j in range(len(mot)):
@@ -87,6 +89,12 @@ def read_gen_bank(filename: str) -> Dict[str, Union[str, List[dict]]]:
                 Features["length"]=mot[j-1]+" bp"
             elif mot[j]=="ORGANISM":
                 Features["organism"]=" ".join(mot[j+2:])
+            elif mot[j] in ["DNA","RNA","Protein","rRNA","mRNA","cRNA","tRNA"]:
+                Features["type"]=mot[j]
+            elif mot[j]=="ORIGIN":
+                Features["sequence"]=("\n").join(ligne[i+1:-3])
+
+    Features["genes"]=Genes
     return Features
     
     """Parse a GenBank file
@@ -108,7 +116,9 @@ def read_gen_bank(filename: str) -> Dict[str, Union[str, List[dict]]]:
                             length: sequence length
                             gbtype: molecule type as described in a genbank entry.
                             organism: organism²
-                            codeTableID: NCBI genetic code table identifier
+                 a=get_genes(get_features(read_flat_file("sequence.gb")))
+b=read_gen_bank(read_flat_file("sequence.gb"))
+           codeTableID: NCBI genetic code table identifier
 
                     list of gene = ORF (dict)
                             start: start position (in bp)
@@ -120,7 +130,3 @@ def read_gen_bank(filename: str) -> Dict[str, Union[str, List[dict]]]:
                             product: product name if available. By default, ‘unknown’.
         """
     pass
-
-a=get_genes(get_features(read_flat_file("sequence.gb")))
-b=read_gen_bank(read_flat_file("sequence.gb"))
-print(b)
