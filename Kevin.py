@@ -89,13 +89,13 @@ def read_gen_bank(filename: str) -> Dict[str, Union[str, List[dict]]]:
                 Features["length"]=mot[j-1]+" bp"
             elif mot[j]=="ORGANISM":
                 Features["organism"]=" ".join(mot[j+2:])
-            elif mot[j] in ["DNA","RNA","Protein","rRNA","mRNA","cRNA","tRNA"]:
+            elif mot[j] in ["DNA","RNA","Protein"]:
                 Features["type"]=mot[j]
             elif mot[j]=="ORIGIN":
-                Features["sequence"]=("\n").join(ligne[i+1:-3])
+                Features["sequence"]=("\n").join(ligne[i+1:-3][10:])
 
     Features["genes"]=Genes
-    return Features
+    return ligne
     
     """Parse a GenBank file
 
