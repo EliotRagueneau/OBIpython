@@ -42,13 +42,13 @@ def find_orf(seq: str, threshold: int, code_table_id: int) -> [ORF]:
     orf_list = []
     for strand in strands:
         inits = []
-        for i in range(len(strands[strand])):
+        for i in range(length):
             if strands[strand][i:i + 3] in start_table:
                 inits.append(i)
         # list_stop = []  # Seulement pour n'avoir que les ORFs maximum
         for init in inits:
             prot = "M"
-            for i in range(init + 3, len(strands[strand]), 3):
+            for i in range(init + 3, length, 3):
                 codon = strands[strand][i: i + 3]
                 if len(codon) == 3:
                     aa = transl_table[codon]
@@ -353,13 +353,13 @@ def complement(seq):
 
 if __name__ == '__main__':
     genome = read_fasta("influenza.fasta")
-    # list_orf = find_orf(genome, 89, 11)
+    list_orf = find_orf(genome, 89, 11)
     # for orf in list_orf:
     #     print(orf.protein)
 
     influenza = GenBank("sequence.gb")
-    # list_prot = [str(x) for x in list_orf]
+    list_prot = [str(x) for x in list_orf]
     for gene in influenza.genes:
         print(gene)
-        # if str(gene) not in list_prot:
-        #     print(gene)
+        if str(gene) not in list_prot:
+            print(gene)
