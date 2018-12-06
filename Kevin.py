@@ -11,11 +11,11 @@ def get_features(txt: str) -> str:
             Returns:
                 string of features
         """
-    conc = txt.split("\n")
+    lines = txt.split("\n")
     features = ""
-    for i in range(len(conc)):
-        if conc[i] == "FEATURES             Location/Qualifiers":
-            features = "".join(conc[i + 1:])
+    for i in range(len(lines)):
+        if lines[i] == "FEATURES             Location/Qualifiers":
+            features = "".join(lines[i + 1:])
             break
     return features
 
@@ -31,44 +31,44 @@ def get_genes(features: str) -> [dict]:
             Returns:
                 list of ORF (either as ORF or as dict)
         """
-    list_CDS = []
+    list_cds = []
     list_genes = []
     bloc = "".join(features.split("          "))
-    bloc_CDS = bloc.split("     ")
-    for ligne in range(len(bloc_CDS)):
-        if bloc_CDS[ligne][0:3] == "CDS":
-            list_CDS.append(ligne)
-    for ligne in range(len(list_CDS)):
-        CDS = {"start": None, "stop": None, "frame": None, "length": None, "name": "unknown", "protein": "xxx",
+    bloc_cds = bloc.split("     ")
+    for ligne in range(len(bloc_cds)):
+        if bloc_cds[ligne][0:3] == "CDS":
+            list_cds.append(ligne)
+    for ligne in range(len(list_cds)):
+        cds = {"start": None, "stop": None, "frame": None, "length": None, "name": "unknown", "protein": "xxx",
                "product": "unknown"}
-        bloc_cleaned = bloc_CDS[list_CDS[ligne]].split("/")
+        bloc_cleaned = bloc_cds[list_cds[ligne]].split("/")
         if bloc_cleaned[0][6:17] == "complement(":
             start = int((bloc_cleaned[0][17:].strip()).split("..")[0])
             inter_stop = (bloc_cleaned[0][17:].strip()).split("..")[1]
             stop = int(inter_stop[:len(inter_stop) - 1])
-            CDS["start"] = start
-            CDS["stop"] = stop
-            CDS["frame"] = 1 - (start % 3)
-            CDS["length"] = stop - start
+            cds["start"] = start
+            cds["stop"] = stop
+            cds["frame"] = 1 - (start % 3)
+            cds["length"] = stop - start
         else:
             start = int((bloc_cleaned[0].strip()).split("..")[0][6:])
             stop = int((bloc_cleaned[0].strip()).split("..")[1])
-            CDS["start"] = start
-            CDS["stop"] = stop
-            CDS["frame"] = 1 + (start % 3)
-            CDS["length"] = stop - start
+            cds["start"] = start
+            cds["stop"] = stop
+            cds["frame"] = 1 + (start % 3)
+            cds["length"] = stop - start
         for ligne2 in range(len(bloc_cleaned)):
             if bloc_cleaned[ligne2][:5] == "gene=":
-                CDS["name"] = (bloc_cleaned[ligne2][5:].split('"'))[1]
+                cds["name"] = (bloc_cleaned[ligne2][5:].split('"'))[1]
             elif bloc_cleaned[ligne2][:8] == "product=":
-                CDS["product"] = (bloc_cleaned[ligne2][8:].split('"'))[1]
+                cds["product"] = (bloc_cleaned[ligne2][8:].split('"'))[1]
             elif bloc_cleaned[ligne2][:12] == "translation=":
                 sequence = (bloc_cleaned[ligne2][12:].split('"')[1]).split(" ")
                 protein = ""
                 for aa in range(len(sequence)):
                     protein = protein + sequence[aa]
-                    CDS["protein"] = protein
-        list_genes.append(CDS)
+                    cds["protein"] = protein
+        list_genes.append(cds)
     return list_genes
     pass
 
@@ -87,8 +87,8 @@ def read_gen_bank(filename: str) -> Dict[str, Union[str, List[dict]]]:
                         features:
                                 description: entry title (genbank descriptor DEFINITION)
                                 type: myBio keywords only - dna, rna, or protein
-                                data: sequence data only if available otherwise set to ‘xxx’. When the sequence is too large
-                                      the entry does not contain data.
+                                data: sequence data only if available otherwise set to ‘xxx’. When the sequence is too
+                                      large the entry does not contain data.
                                 ID: Identifier (locus)
                                 length: sequence length
                                 gbtype: molecule type as described in a genbank entry.
@@ -104,27 +104,26 @@ def read_gen_bank(filename: str) -> Dict[str, Union[str, List[dict]]]:
                                 protein: translated protein sequence if available. By default, ‘xxx’.
                                 product: product name if available. By default, ‘unknown’.
             """
-    Features = {"Description": None, "ID": None, "length": None, "organism": None, "type": None, "genes": None,
+    features = {"Description": None, "ID": None, "length": None, "organism": None, "type": None, "genes": None,
                 "sequence": None}
-    Genes = get_genes(get_features(read_flat_file(filename)))
-    String = read_flat_file(filename)
-    ligne = String.split("\n")
-    for i in range(len(ligne)):
-        mot = ligne[i].split(" ")
-        for j in range(len(mot)):
-            if mot[j] == "DEFINITION":
-                Features["Description"] = " ".join(mot[j + 2:])
-            elif mot[j] == "VERSION":
-                Features["ID"] = mot[j + 5]
-            elif mot[j] == "bp":
-                Features["length"] = mot[j - 1] + " bp"
-            elif mot[j] == "ORGANISM":
-                Features["organism"] = " ".join(mot[j + 2:])
-            elif mot[j] in ["DNA", "RNA", "Protein"]:
-                Features["type"] = mot[j]
-            elif mot[j] == "ORIGIN":
-                Features["sequence"] = "\n".join(ligne[i + 1:-3][10:])
+    genes = get_genes(get_features(read_flat_file(filename)))
+    string = read_flat_file(filename)
+    lignes = string.split("\n")
+    for i in range(len(lignes)):
+        mots = lignes[i].split(" ")
+        for j in range(len(mots)):
+            if mots[j] == "DEFINITION":
+                features["Description"] = " ".join(mots[j + 2:])
+            elif mots[j] == "VERSION":
+                features["ID"] = mots[j + 5]
+            elif mots[j] == "bp":
+                features["length"] = mots[j - 1] + " bp"
+            elif mots[j] == "ORGANISM":
+                features["organism"] = " ".join(mots[j + 2:])
+            elif mots[j] in ["DNA", "RNA", "Protein"]:
+                features["type"] = mots[j]
+            elif mots[j] == "ORIGIN":
+                features["sequence"] = "\n".join(lignes[i + 1:-3][10:])
 
-    Features["genes"] = Genes
-    return ligne
-
+    features["genes"] = genes
+    return lignes
