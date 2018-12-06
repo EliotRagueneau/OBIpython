@@ -5,7 +5,7 @@ class ORF:
     """Open Reading Frame defined by start and stop nucleotide"""
 
     def __init__(self, start: int, stop: int, frame: int, protein: str = "xxx", product: str = "xxx",
-                 name: str = "xxx"):
+                 name: str = "unknown"):
         self.start = start
         self.stop = stop
 
@@ -19,8 +19,7 @@ class ORF:
         return self.length
 
     def __repr__(self):
-        # return "{} : {}..{} --> {}".format(self.name, self.start, self.stop, self.product)
-        return "{} : {}..{} ".format(self.frame, self.start, self.stop)
+        return "{:2} : {:10}..{:<10}. {:7} --> {}".format(self.frame, self.start, self.stop, self.name, self.product)
 
 
 def find_orf(seq: str, threshold: int, code_table_id: int) -> [ORF]:
@@ -63,7 +62,6 @@ def find_orf(seq: str, threshold: int, code_table_id: int) -> [ORF]:
                                                     frame=init % 3 + 1,
                                                     protein=prot))
                             else:
-                                print(-1 * ((init - 1) % 3 + 1))
                                 orf_list.append(ORF(start=length - (i + 2),
                                                     stop=length - init,
                                                     frame=-1 * ((init - 1) % 3 + 1),
@@ -289,7 +287,6 @@ class GenBank:
                 start = int(pos[0])
                 stop = int(pos[1].strip(')'))
                 frame = -((self.length - start) % 3 + 1)
-                print(frame)
             else:
                 pos = [int(x) for x in cds[0][16:].split('..')]
                 start = int(pos[0])
@@ -355,24 +352,14 @@ def complement(seq):
 
 
 if __name__ == '__main__':
-
+    genome = read_fasta("influenza.fasta")
+    # list_orf = find_orf(genome, 89, 11)
     # for orf in list_orf:
     #     print(orf.protein)
-    genome = read_fasta("influenza.fasta")
-    # print(len(genome))
-    list_orf = find_orf(genome, 89, 11)
-    # gene = genome[5045:6626]
-    # test = reversed_complement(genome)[len(genome) - 6626: len(genome) - 5046]
-    # print(translate(test))
-    # print("reverse-complement\n", translate(reversed_complement(gene)))
 
     influenza = GenBank("sequence.gb")
-    list_prot = [str(x) for x in list_orf]
+    # list_prot = [str(x) for x in list_orf]
     for gene in influenza.genes:
-        if str(gene) not in list_prot:
-            print(gene)
-    #
-    # print(sum([gene.length for gene in influ.genes]) / len(influ.genes))
-    # print(min([gene.length for gene in influ.genes]))
-    #
-    # another = GenBank("another.gb")
+        print(gene)
+        # if str(gene) not in list_prot:
+        #     print(gene)
