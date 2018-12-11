@@ -19,7 +19,7 @@ class ORF:
         return self.length
 
     def __repr__(self):
-        return "{:2} : {:10}..{:<10}. {:7} --> {}".format(self.frame, self.start, self.stop, self.name, self.product)
+        return "{:2} :{:9}..{:<9}. {:7} --> {}".format(self.frame, self.start, self.stop, self.name, self.product)
 
 
 def find_orf(seq: str, threshold: int, code_table_id: int) -> [ORF]:
