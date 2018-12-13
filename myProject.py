@@ -19,16 +19,17 @@ class ORF:
         return self.length
 
     def __repr__(self):
-        return "{:2} :{:9}..{:<9}. {:7} --> {}".format(self.frame, self.start, self.stop, self.name, self.product)
+        # return "{:2} :{:9}..{:<9}. {:7} --> {}".format(self.frame, self.start, self.stop, self.name, self.product)
+        return "{:2} :{:9}..{:<9} --> {}".format(self.frame, self.start, self.stop, self.protein)
 
 
 def find_orf(seq: str, threshold: int, code_table_id: int) -> [ORF]:
     """Give a list of all ORF in the sequence if they are grater than the threshold
 
-            This function is written by Eliot Ragueneau.
+            This function is written by Théo Gauvrit.
 
             Args:
-                seq: Sequence source
+                seq: Sequence to analyse
                 threshold: Minimum size of the ORF in the list
                 code_table_id: NCBI identifier of the translation table used on this sequence
 
@@ -45,7 +46,6 @@ def find_orf(seq: str, threshold: int, code_table_id: int) -> [ORF]:
         for i in range(length):
             if strands[strand][i:i + 3] in start_table:
                 inits.append(i)
-        # list_stop = []  # Seulement pour n'avoir que les ORFs maximum
         for init in inits:
             prot = "M"
             for i in range(init + 3, length, 3):
@@ -53,8 +53,60 @@ def find_orf(seq: str, threshold: int, code_table_id: int) -> [ORF]:
                 if len(codon) == 3:
                     aa = transl_table[codon]
                     if aa == "*":
-                        if i - init > threshold:  # and i not in list_stop:  Seulement pour n'avoir que les ORFs maximum
-                            # list_stop.append(i)
+                        if i - init > threshold:
+                            if strand > 0:
+                                init += 1
+                                orf_list.append(ORF(start=init,
+                                                    stop=i + 3,
+                                                    frame=init % 3 + 1,
+                                                    protein=prot))
+                            else:
+                                orf_list.append(ORF(start=length - (i + 2),
+                                                    stop=length - init,
+                                                    frame=-1 * ((init - 1) % 3 + 1),
+                                                    protein=prot))
+                            break
+                        else:
+                            break
+                    prot += aa
+
+    return orf_list
+
+
+def find_orf_ncbi(seq: str, threshold: int, code_table_id: int) -> [ORF]:
+    """Give a list of all ORF in the sequence if they are grater than the threshold.
+       NCBI version so only gives biggest ORFs.
+
+            This function is written by Théo Gauvrit.
+
+            Args:
+                seq: Sequence to analyse
+                threshold: Minimum size of the ORF in the list
+                code_table_id: NCBI identifier of the translation table used on this sequence
+
+            Returns:
+                list of ORF
+        """
+    transl_table, start_table = get_genetic_code(code_table_id)
+
+    length = len(seq)
+    strands = {1: seq, -1: reversed_complement(seq)}
+    orf_list = []
+    for strand in strands:
+        inits = []
+        for i in range(length):
+            if strands[strand][i:i + 3] in start_table:
+                inits.append(i)
+        list_stop = []
+        for init in inits:
+            prot = "M"
+            for i in range(init + 3, length, 3):
+                codon = strands[strand][i: i + 3]
+                if len(codon) == 3:
+                    aa = transl_table[codon]
+                    if aa == "*":
+                        if i - init > threshold and i not in list_stop:
+                            list_stop.append(i)
                             if strand > 0:
                                 init += 1
                                 orf_list.append(ORF(start=init,
@@ -98,7 +150,7 @@ def get_genetic_code(ncbi_id: int) -> Tuple[dict, dict]:
 def get_lengths(orf_list: list) -> [int]:
     """Give the list of orf lengths from a list of orf
 
-        This function is written by Eliot Ragueneau.
+        This function is written by Mélissa Sadouki.
 
         Args:
             orf_list: list of ORF.
@@ -112,7 +164,7 @@ def get_lengths(orf_list: list) -> [int]:
 def get_longest_orf(orf_list: List[ORF]) -> ORF:
     """Give the longest orf from a list of orf
 
-            This function is written by Eliot Ragueneau.
+            This function is written by Mélissa Sadouki.
 
             Args:
                 orf_list: list of ORF.
@@ -126,7 +178,7 @@ def get_longest_orf(orf_list: List[ORF]) -> ORF:
 def get_top_longest_orf(orf_list: List[ORF], value: float) -> [ORF]:
     """Return the value% top longest orfs from a list of orf
 
-            This function is written by Eliot Ragueneau.
+            This function is written by Mélissa Sadouki.
 
             Args:
                 orf_list: list of ORF.
@@ -142,7 +194,7 @@ def get_top_longest_orf(orf_list: List[ORF], value: float) -> [ORF]:
 def reversed_complement(dna_seq: str):
     """Return the reversed complement of the given DNA sequence
 
-            This function is written by Eliot Ragueneau.
+            This function is written by Théo Gauvrit.
 
             Args:
                 dna_seq: DNA sequence to be reversed.
@@ -155,6 +207,23 @@ def reversed_complement(dna_seq: str):
 
 
 def read_csv(filename: str, separator: str = ";") -> [dict]:
+    """Read a csv file delimited by separator
+
+            This function is written by Eliot Ragueneau.
+
+            Args:
+                filename: .csv file to read
+                separator: separator between data in the csv file
+
+            Returns:
+                list of dictionary of features:
+                    [
+                     {colonne 1: element 1, colonne 2: element 2}
+                     {colonne 1: element 3, colonne 2: element 4}
+                     {colonne 1: element 5, colonne 2: element 6}
+                     {colonne 1: element 7, colonne 2: element 8}
+                    ]
+        """
     with open(filename, 'r') as file:
         list_lines = [line.strip() for line in file.readlines()]
         keys = list_lines[0].split(separator)
@@ -162,6 +231,19 @@ def read_csv(filename: str, separator: str = ";") -> [dict]:
 
 
 def write_csv(filename: str, data: list, separator: str = ";"):
+    """Write a csv file delimited by separator from a list of dictionary
+
+                    This function is written by Eliot Ragueneau.
+
+                    Args:
+                        filename: .csv file to read
+                        data: list of dict where each dict is a line in the product file,
+                                                and their keys the first row of the file
+                        separator: separator between data in the csv file
+
+                    Returns:
+                        None
+                """
     if isinstance(data[0], ORF):
         data = [orf.as_dict() for orf in data]
     filename += ".csv" if filename[-4:] != ".csv" else ""
@@ -177,7 +259,7 @@ class GenBank:
     def __init__(self, filename: str):
         """Parse a GenBank file
 
-                    This function is written by .
+                    This function is written by Kévin Merchadou.
 
                     Args:
                         filename: .gb file to parse
@@ -226,7 +308,7 @@ class GenBank:
     def read_flat_file(filename: str) -> str:
         """Load a file in memory by returning a string
 
-                This function is written by .
+                This function is written by Théo Gauvrit.
 
                 Args:
                     filename: file to open
@@ -241,7 +323,7 @@ class GenBank:
     def get_features(txt: str) -> str:
         """Extract features lines from flat text and return them
 
-                This function is written by .
+                This function is written by Kévin Merchadou.
 
                 Args:
                     txt: flat text with features to extract
@@ -257,7 +339,7 @@ class GenBank:
     def get_genes(self, features: str) -> [ORF]:
         """Extract gene and CDS data from their section inside features table
 
-                This function is written by .
+                This function is written by Kévin Merchadou.
 
                 Args:
                     features: text with gene to extract
@@ -312,7 +394,7 @@ class GenBank:
     def read(filename):
         """Parse a GenBank file
 
-                This function is written by .
+                This function is written by Kévin Merchadou.
 
                 Args:
                     filename: .gb file to parse
@@ -327,6 +409,16 @@ class GenBank:
 
 
 def read_fasta(filename: str) -> str:
+    """Parse a simple FASTA file (only one sequence)
+
+            This function is written by Eliot Ragueneau.
+
+            Args:
+                filename: .fasta file to parse
+
+            Returns:
+                sequence contained in the fasta
+    """
     dna = ""
     with open(filename, 'r') as fasta:
         for fasta_line in fasta:
@@ -335,31 +427,35 @@ def read_fasta(filename: str) -> str:
     return dna
 
 
-def translate(seq):
-    transl_table, start_table = get_genetic_code(11)
-    prot = "M"
-    for i in range(3, len(seq), 3):
-        codon = seq[i: i + 3]
-        if len(codon) == 3:
-            aa = transl_table[codon]
-            prot += aa
-    return prot
-
-
-def complement(seq):
-    complement_dict = {"A": "T", "T": "A", "C": "G", "G": "C"}
-    return "".join([complement_dict[i] for i in seq])
-
-
 if __name__ == '__main__':
-    genome = read_fasta("influenza.fasta")
-    list_orf = find_orf(genome, 89, 11)
-    # for orf in list_orf:
-    #     print(orf.protein)
-
+    """Show if the find orf function give all the genes described in the gb file or not"""
     influenza = GenBank("sequence.gb")
-    list_prot = [str(x) for x in list_orf]
+
+    genome = read_fasta("influenza.fasta")
+
+    print(len(influenza.genes))
+
+    print("Our method")
+
+    list_orf = find_orf(genome, 89, 11)
+
+    list_repr = [str(orf) for orf in list_orf]
     for gene in influenza.genes:
-        print(gene)
-        if str(gene) not in list_prot:
+        if str(gene) not in list_repr:
             print(gene)
+    our_len = len(list_orf)
+
+    print("NCBI find orf method")
+
+    list_orf = find_orf_ncbi(genome, 89, 11)
+
+    n = 0
+    list_repr = [str(orf) for orf in list_orf]
+    for gene in influenza.genes:
+        if str(gene) not in list_repr:
+            print(gene)
+            n += 1
+
+    print(n / len(influenza.genes))
+    print(our_len)
+    print(len(list_orf))

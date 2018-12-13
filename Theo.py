@@ -1,4 +1,4 @@
-from eliot_main import get_genetic_code, read_fasta
+from myProject import get_genetic_code, read_fasta
 
 
 def read_flat_file(filename):
