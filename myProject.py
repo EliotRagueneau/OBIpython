@@ -1,4 +1,8 @@
+import statistics
 from typing import *
+
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 class ORF:
@@ -53,7 +57,7 @@ def find_orf(seq: str, threshold: int, code_table_id: int) -> [ORF]:
                 if len(codon) == 3:
                     aa = transl_table[codon]
                     if aa == "*":
-                        if i - init > threshold:
+                        if i - init >= threshold:
                             if strand > 0:
                                 init += 1
                                 orf_list.append(ORF(start=init,
@@ -105,7 +109,7 @@ def find_orf_ncbi(seq: str, threshold: int, code_table_id: int) -> [ORF]:
                 if len(codon) == 3:
                     aa = transl_table[codon]
                     if aa == "*":
-                        if i - init > threshold and i not in list_stop:
+                        if i - init >= threshold and i not in list_stop:
                             list_stop.append(i)
                             if strand > 0:
                                 init += 1
@@ -432,30 +436,45 @@ if __name__ == '__main__':
     influenza = GenBank("sequence.gb")
 
     genome = read_fasta("influenza.fasta")
+    lengths = get_lengths(influenza.genes)
+    sns.kdeplot(lengths, shade=True, cut=0,
+                label="min : {}\nmax : {}\nmean : {:.2f}\nmedian : {}".format(min(lengths),
+                                                                              max(lengths),
+                                                                              statistics.mean(lengths),
+                                                                              statistics.median(lengths)))
+    plt.title("Distribution des tailles des CDS de CP007470.1")
+    plt.xlim(0, 5000)
+    plt.xlabel("Tailles des ORFs (pb)")
+    frame1 = plt.gca()
+    frame1.axes.get_yaxis().set_ticks([])
+    # plt.axis("off")
+    plt.savefig("distribCDS")
+    plt.show()
 
+    threshold = 420
     print(len(influenza.genes))
 
     print("Our method")
 
-    list_orf = find_orf(genome, 89, 11)
+    list_orf = find_orf(genome, threshold, 11)
 
     list_repr = [str(orf) for orf in list_orf]
-    for gene in influenza.genes:
-        if str(gene) not in list_repr:
-            print(gene)
+    # for gene in influenza.genes:
+    #     if str(gene) not in list_repr:
+    #         print(gene)
     our_len = len(list_orf)
 
     print("NCBI find orf method")
 
-    list_orf = find_orf_ncbi(genome, 89, 11)
+    list_orf = find_orf_ncbi(genome, threshold, 11)
 
-    n = 0
-    list_repr = [str(orf) for orf in list_orf]
-    for gene in influenza.genes:
-        if str(gene) not in list_repr:
-            print(gene)
-            n += 1
+    # n = 0
+    # list_repr = [str(orf) for orf in list_orf]
+    # for gene in influenza.genes:
+    #     if str(gene) not in list_repr:
+    #         print(gene)
+    #         n += 1
 
-    print(n / len(influenza.genes))
+    # print(n / len(influenza.genes))
     print(our_len)
     print(len(list_orf))
