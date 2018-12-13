@@ -28,7 +28,7 @@ class ORF:
 
     @property
     def comparable_attributes(self):
-        return self.frame, self.start, self.stop, self.protein
+        return self.start, self.stop, self.frame, self.protein
 
 
 def find_orf_all(seq: str, threshold: int, code_table_id: int) -> [ORF]:
@@ -417,9 +417,20 @@ class GenBank:
 
 
 def compare(orf_list_1: Iterable[ORF], orf_list_2: Iterable[ORF]) -> {ORF}:
+    """Compare two iterables containing ORFs.
+    Two ORFs are considered as identical if they have the same frame,
+    the same starting position, the same stop position, and the same protein sequence produced.
+        This function is written by Eliot Ragueneau.
+
+                    Args:
+                        orf_list_1: list or any iterable containing ORF objects
+                        orf_list_2: list or any iterable containing ORF objects
+
+                    Returns:
+                        intersections of the two sets"""
     orf_set_1 = {orf.comparable_attributes for orf in orf_list_1}
     orf_set_2 = {orf.comparable_attributes for orf in orf_list_2}
-    return orf_set_1.intersection(orf_set_2)
+    return [ORF(*orf) for orf in orf_set_1.intersection(orf_set_2)]
 
 
 def read_fasta(filename: str) -> str:
