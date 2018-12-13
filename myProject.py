@@ -3,6 +3,7 @@ from typing import *
 
 import matplotlib.pyplot as plt
 import seaborn as sns
+from matplotlib_venn import venn2
 
 
 class ORF:
@@ -23,11 +24,14 @@ class ORF:
         return self.length
 
     def __repr__(self):
-        # return "{:2} :{:9}..{:<9}. {:7} --> {}".format(self.frame, self.start, self.stop, self.name, self.product)
-        return "{:2} :{:9}..{:<9} --> {}".format(self.frame, self.start, self.stop, self.protein)
+        return "{:2} :{:9}..{:<9}. {:7} --> {}".format(self.frame, self.start, self.stop, self.name, self.product)
+
+    @property
+    def comparable_attributes(self):
+        return self.frame, self.start, self.stop, self.protein
 
 
-def find_orf(seq: str, threshold: int, code_table_id: int) -> [ORF]:
+def find_orf_all(seq: str, threshold: int, code_table_id: int) -> [ORF]:
     """Give a list of all ORF in the sequence if they are grater than the threshold
 
             This function is written by Théo Gauvrit.
@@ -77,7 +81,7 @@ def find_orf(seq: str, threshold: int, code_table_id: int) -> [ORF]:
     return orf_list
 
 
-def find_orf_ncbi(seq: str, threshold: int, code_table_id: int) -> [ORF]:
+def find_orf_max(seq: str, threshold: int, code_table_id: int) -> [ORF]:
     """Give a list of all ORF in the sequence if they are grater than the threshold.
        NCBI version so only gives biggest ORFs.
 
@@ -352,7 +356,7 @@ class GenBank:
                     list of ORF (either as ORF or as dict)
             """
         ls = features.split('\n')
-        cds_begins, cds_begins, cds_ends, list_cds, list_orf = [], [], [], [], []
+        cds_begins, cds_begins, cds_ends, cds_list, orf_list = [], [], [], [], []
         cds = False
 
         for i in range(len(ls)):  # Récupération des positions des différentes entrées CDS
@@ -365,9 +369,9 @@ class GenBank:
                 cds_ends.append(i)
 
         for i in range(len(cds_begins)):  # Récupération des CDS depuis leurs positions dans le fichier
-            list_cds.append(ls[cds_begins[i]: cds_ends[i]])
+            cds_list.append(ls[cds_begins[i]: cds_ends[i]])
 
-        for cds in list_cds:  # Création de la liste d'ORF à partir de la liste de CDS du fichier gb
+        for cds in cds_list:  # Création de la liste d'ORF à partir de la liste de CDS du fichier gb
             if cds[0][16:26] == "complement":
                 pos = cds[0][27:].split('..')
                 start = int(pos[0])
@@ -390,9 +394,9 @@ class GenBank:
                 elif "/translation" == line[:12]:
                     protein = ''.join([x[16:] for x in cds[i:]]).split('"')[1]
                     break
-            list_orf.append(ORF(start, stop, frame, protein, product, name))
+            orf_list.append(ORF(start, stop, frame, protein, product, name))
 
-        return list_orf
+        return orf_list
 
     @staticmethod
     def read(filename):
@@ -410,6 +414,12 @@ class GenBank:
 
     def __repr__(self):
         return "{} : {} of {}".format(self.id, self.gbtype, self.organism)
+
+
+def compare(orf_list_1: Iterable[ORF], orf_list_2: Iterable[ORF]) -> {ORF}:
+    orf_set_1 = {orf.comparable_attributes for orf in orf_list_1}
+    orf_set_2 = {orf.comparable_attributes for orf in orf_list_2}
+    return orf_set_1.intersection(orf_set_2)
 
 
 def read_fasta(filename: str) -> str:
@@ -432,49 +442,44 @@ def read_fasta(filename: str) -> str:
 
 
 if __name__ == '__main__':
-    """Show if the find orf function give all the genes described in the gb file or not"""
     influenza = GenBank("sequence.gb")
-
-    genome = read_fasta("influenza.fasta")
-    lengths = get_lengths(influenza.genes)
-    sns.kdeplot(lengths, shade=True, cut=0,
-                label="min : {}\nmax : {}\nmean : {:.2f}\nmedian : {}".format(min(lengths),
-                                                                              max(lengths),
-                                                                              statistics.mean(lengths),
-                                                                              statistics.median(lengths)))
+    genes_lengths = get_lengths(influenza.genes)
+    sns.kdeplot(get_lengths(influenza.genes), shade=True, cut=0,
+                label="min : {}\nmax : {}\nmean : {:.2f}\nmedian : {}".format(min(genes_lengths),
+                                                                              max(genes_lengths),
+                                                                              statistics.mean(genes_lengths),
+                                                                              statistics.median(genes_lengths)))
     plt.title("Distribution des tailles des CDS de CP007470.1")
     plt.xlim(0, 5000)
     plt.xlabel("Tailles des ORFs (pb)")
     frame1 = plt.gca()
     frame1.axes.get_yaxis().set_ticks([])
-    # plt.axis("off")
     plt.savefig("distribCDS")
     plt.show()
 
-    threshold = 420
-    print(len(influenza.genes))
+    influenza_gene_set = {orf.comparable_attributes for orf in influenza.genes}
+    length_genes = len(influenza_gene_set)
 
-    print("Our method")
+    genome = read_fasta("influenza.fasta")
 
-    list_orf = find_orf(genome, threshold, 11)
+    for threshold in (0, 90, 210, 300, 420)[::-1]:
+        list_orf = find_orf_all(genome, threshold, 11)
+        set_orf = {orf.comparable_attributes for orf in list_orf}
+        length_intersection = len(set_orf.intersection(influenza_gene_set))
 
-    list_repr = [str(orf) for orf in list_orf]
-    # for gene in influenza.genes:
-    #     if str(gene) not in list_repr:
-    #         print(gene)
-    our_len = len(list_orf)
+        venn2(subsets=(len(list_orf) - length_intersection, length_genes - length_intersection, length_intersection),
+              set_labels=('ORFs trouvés', 'CDS GenBank'))
+        plt.title("Diagramme de Venn des résultats de l'algorithme \"ALL\"\n avec un seuil de {}".format(threshold))
+        plt.savefig("venn_{}_all".format(threshold))
+        plt.show()
 
-    print("NCBI find orf method")
+        list_orf = find_orf_max(genome, threshold, 11)
+        set_orf = {orf.comparable_attributes for orf in list_orf}
+        length_intersection = len(set_orf.intersection(influenza_gene_set))
 
-    list_orf = find_orf_ncbi(genome, threshold, 11)
+        venn2(subsets=(len(list_orf) - length_intersection, length_genes - length_intersection, length_intersection),
+              set_labels=('ORFs trouvés', 'CDS GenBank'))
+        plt.title("Diagramme de Venn des résultats de l'algorithme \"MAX\"\n avec un seuil de {}".format(threshold))
 
-    # n = 0
-    # list_repr = [str(orf) for orf in list_orf]
-    # for gene in influenza.genes:
-    #     if str(gene) not in list_repr:
-    #         print(gene)
-    #         n += 1
-
-    # print(n / len(influenza.genes))
-    print(our_len)
-    print(len(list_orf))
+        plt.savefig("venn_{}_max".format(threshold))
+        plt.show()
