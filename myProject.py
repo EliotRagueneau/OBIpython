@@ -31,236 +31,6 @@ class ORF:
         return self.start, self.stop, self.frame, self.protein
 
 
-def find_orf_all(seq: str, threshold: int, code_table_id: int) -> [ORF]:
-    """Give a list of all ORF in the sequence if they are grater than the threshold
-
-            This function is written by Théo Gauvrit.
-
-            Args:
-                seq: Sequence to analyse
-                threshold: Minimum size of the ORF in the list
-                code_table_id: NCBI identifier of the translation table used on this sequence
-
-            Returns:
-                list of ORF
-        """
-    transl_table, start_table = get_genetic_code(code_table_id)
-
-    length = len(seq)
-    strands = {1: seq, -1: reversed_complement(seq)}
-    orf_list = []
-    for strand in strands:
-        inits = []
-        for i in range(length):
-            if strands[strand][i:i + 3] in start_table:
-                inits.append(i)
-        for init in inits:
-            prot = "M"
-            for i in range(init + 3, length, 3):
-                codon = strands[strand][i: i + 3]
-                if len(codon) == 3:
-                    aa = transl_table[codon]
-                    if aa == "*":
-                        if i - init >= threshold:
-                            if strand > 0:
-                                init += 1
-                                orf_list.append(ORF(start=init,
-                                                    stop=i + 3,
-                                                    frame=init % 3 + 1,
-                                                    protein=prot))
-                            else:
-                                orf_list.append(ORF(start=length - (i + 2),
-                                                    stop=length - init,
-                                                    frame=-1 * ((init - 1) % 3 + 1),
-                                                    protein=prot))
-                            break
-                        else:
-                            break
-                    prot += aa
-
-    return orf_list
-
-
-def find_orf_max(seq: str, threshold: int, code_table_id: int) -> [ORF]:
-    """Give a list of all ORF in the sequence if they are grater than the threshold.
-       NCBI version so only gives biggest ORFs.
-
-            This function is written by Théo Gauvrit.
-
-            Args:
-                seq: Sequence to analyse
-                threshold: Minimum size of the ORF in the list
-                code_table_id: NCBI identifier of the translation table used on this sequence
-
-            Returns:
-                list of ORF
-        """
-    transl_table, start_table = get_genetic_code(code_table_id)
-
-    length = len(seq)
-    strands = {1: seq, -1: reversed_complement(seq)}
-    orf_list = []
-    for strand in strands:
-        inits = []
-        for i in range(length):
-            if strands[strand][i:i + 3] in start_table:
-                inits.append(i)
-        list_stop = []
-        for init in inits:
-            prot = "M"
-            for i in range(init + 3, length, 3):
-                codon = strands[strand][i: i + 3]
-                if len(codon) == 3:
-                    aa = transl_table[codon]
-                    if aa == "*":
-                        if i - init >= threshold and i not in list_stop:
-                            list_stop.append(i)
-                            if strand > 0:
-                                init += 1
-                                orf_list.append(ORF(start=init,
-                                                    stop=i + 3,
-                                                    frame=init % 3 + 1,
-                                                    protein=prot))
-                            else:
-                                orf_list.append(ORF(start=length - (i + 2),
-                                                    stop=length - init,
-                                                    frame=-1 * ((init - 1) % 3 + 1),
-                                                    protein=prot))
-                            break
-                        else:
-                            break
-                    prot += aa
-
-    return orf_list
-
-
-def get_genetic_code(ncbi_id: int) -> Tuple[dict, dict]:
-    """Give the initiation codons and the translation table by its id
-
-            This function is written by Eliot Ragueneau.
-
-            Args:
-                ncbi_id: ncbi translation table identifier
-
-            Returns:
-                transl_table: translating dictionary
-                start_table: list of start codons
-        """
-    with open("Translation_tables/{}.txt".format(ncbi_id), "r") as file:
-        lines = [line.strip() for line in file.readlines()]
-        transl_table = {lines[2][i] + lines[3][i] + lines[4][i]: lines[0][i]
-                        for i in range(len(lines[0]))}
-        start_table = {lines[2][i] + lines[3][i] + lines[4][i]: lines[1][i]
-                       for i in range(len(lines[0])) if lines[1][i] == "M"}
-        return transl_table, start_table
-
-
-def get_lengths(orf_list: list) -> [int]:
-    """Give the list of orf lengths from a list of orf
-
-        This function is written by Mélissa Sadouki.
-
-        Args:
-            orf_list: list of ORF.
-
-        Returns:
-            list of lengths of ORF
-        """
-    return [len(orf) for orf in orf_list]
-
-
-def get_longest_orf(orf_list: List[ORF]) -> ORF:
-    """Give the longest orf from a list of orf
-
-            This function is written by Mélissa Sadouki.
-
-            Args:
-                orf_list: list of ORF.
-
-            Returns:
-                longest ORF
-        """
-    return max(orf_list, key=lambda orf: len(orf))
-
-
-def get_top_longest_orf(orf_list: List[ORF], value: float) -> [ORF]:
-    """Return the value% top longest orfs from a list of orf
-
-            This function is written by Mélissa Sadouki.
-
-            Args:
-                orf_list: list of ORF.
-                value: 0 > float > 1 : % of the top longest orf to show
-
-            Returns:
-                list of top ORF
-        """
-    orf_list.sort(key=lambda orf: len(orf))
-    return orf_list[int(- value * len(orf_list)) - 1:]
-
-
-def reversed_complement(dna_seq: str):
-    """Return the reversed complement of the given DNA sequence
-
-            This function is written by Théo Gauvrit.
-
-            Args:
-                dna_seq: DNA sequence to be reversed.
-
-            Returns:
-                reversed complement DNA sequence
-        """
-    complement_dict = {"A": "T", "T": "A", "C": "G", "G": "C"}
-    return "".join([complement_dict[i] for i in dna_seq[::-1]])
-
-
-def read_csv(filename: str, separator: str = ";") -> [dict]:
-    """Read a csv file delimited by separator
-
-            This function is written by Eliot Ragueneau.
-
-            Args:
-                filename: .csv file to read
-                separator: separator between data in the csv file
-
-            Returns:
-                list of dictionary of features:
-                    [
-                     {colonne 1: element 1, colonne 2: element 2}
-                     {colonne 1: element 3, colonne 2: element 4}
-                     {colonne 1: element 5, colonne 2: element 6}
-                     {colonne 1: element 7, colonne 2: element 8}
-                    ]
-        """
-    with open(filename, 'r') as file:
-        list_lines = [line.strip() for line in file.readlines()]
-        keys = list_lines[0].split(separator)
-        return [{key: element for key in keys for element in line.split(separator)} for line in list_lines[1:]]
-
-
-def write_csv(filename: str, data: list, separator: str = ";"):
-    """Write a csv file delimited by separator from a list of dictionary
-
-                    This function is written by Eliot Ragueneau.
-
-                    Args:
-                        filename: .csv file to read
-                        data: list of dict where each dict is a line in the product file,
-                                                and their keys the first row of the file
-                        separator: separator between data in the csv file
-
-                    Returns:
-                        None
-                """
-    if isinstance(data[0], ORF):
-        data = [orf.as_dict() for orf in data]
-    filename += ".csv" if filename[-4:] != ".csv" else ""
-    with open(filename, "w") as file:
-        file.write("{}\n".format(separator.join(data[0])))  # Write only the keys
-        for dictionary in data:
-            file.write("{}\n".format(separator.join([str(dictionary[key]) for key in dictionary])))
-
-
 class GenBank:
     """GenBank data structure (More interesting than dictionaries)"""
 
@@ -416,22 +186,7 @@ class GenBank:
         return "{} : {} of {}".format(self.id, self.gbtype, self.organism)
 
 
-def compare(orf_list_1: Iterable[ORF], orf_list_2: Iterable[ORF]) -> {ORF}:
-    """Compare two iterables containing ORFs.
-    Two ORFs are considered as identical if they have the same frame,
-    the same starting position, the same stop position, and the same protein sequence produced.
-        This function is written by Eliot Ragueneau.
-
-                    Args:
-                        orf_list_1: list or any iterable containing ORF objects
-                        orf_list_2: list or any iterable containing ORF objects
-
-                    Returns:
-                        intersections of the two sets"""
-    orf_set_1 = {orf.comparable_attributes for orf in orf_list_1}
-    orf_set_2 = {orf.comparable_attributes for orf in orf_list_2}
-    return [ORF(*orf) for orf in orf_set_1.intersection(orf_set_2)]
-
+# -------- FUNCTIONS --------- #
 
 def read_fasta(filename: str) -> str:
     """Parse a simple FASTA file (only one sequence)
@@ -450,6 +205,253 @@ def read_fasta(filename: str) -> str:
             if fasta_line[0] != ">":
                 dna += fasta_line.strip()
     return dna
+
+
+def get_genetic_code(ncbi_id: int) -> Tuple[dict, dict]:
+    """Give the initiation codons and the translation table by its id
+
+            This function is written by Eliot Ragueneau.
+
+            Args:
+                ncbi_id: ncbi translation table identifier
+
+            Returns:
+                transl_table: translating dictionary
+                start_table: list of start codons
+        """
+    with open("Translation_tables/{}.txt".format(ncbi_id), "r") as file:
+        lines = [line.strip() for line in file.readlines()]
+        transl_table = {lines[2][i] + lines[3][i] + lines[4][i]: lines[0][i]
+                        for i in range(len(lines[0]))}
+        start_table = {lines[2][i] + lines[3][i] + lines[4][i]: lines[1][i]
+                       for i in range(len(lines[0])) if lines[1][i] == "M"}
+        return transl_table, start_table
+
+
+def reversed_complement(dna_seq: str):
+    """Return the reversed complement of the given DNA sequence
+
+            This function is written by Théo Gauvrit.
+
+            Args:
+                dna_seq: DNA sequence to be reversed.
+
+            Returns:
+                reversed complement DNA sequence
+        """
+    complement_dict = {"A": "T", "T": "A", "C": "G", "G": "C"}
+    return "".join([complement_dict[i] for i in dna_seq[::-1]])
+
+
+def find_orf_all(seq: str, threshold: int, code_table_id: int) -> [ORF]:
+    """Give a list of all ORF in the sequence if they are grater than the threshold
+
+            This function is written by Théo Gauvrit.
+
+            Args:
+                seq: Sequence to analyse
+                threshold: Minimum size of the ORF in the list
+                code_table_id: NCBI identifier of the translation table used on this sequence
+
+            Returns:
+                list of ORF
+        """
+    transl_table, start_table = get_genetic_code(code_table_id)
+
+    length = len(seq)
+    strands = {1: seq, -1: reversed_complement(seq)}
+    orf_list = []
+    for strand in strands:
+        inits = []
+        for i in range(length):
+            if strands[strand][i:i + 3] in start_table:
+                inits.append(i)
+        for init in inits:
+            prot = "M"
+            for i in range(init + 3, length, 3):
+                codon = strands[strand][i: i + 3]
+                if len(codon) == 3:
+                    aa = transl_table[codon]
+                    if aa == "*":
+                        if i - init >= threshold:
+                            if strand > 0:
+                                init += 1
+                                orf_list.append(ORF(start=init,
+                                                    stop=i + 3,
+                                                    frame=init % 3 + 1,
+                                                    protein=prot))
+                            else:
+                                orf_list.append(ORF(start=length - (i + 2),
+                                                    stop=length - init,
+                                                    frame=-1 * ((init - 1) % 3 + 1),
+                                                    protein=prot))
+                            break
+                        else:
+                            break
+                    prot += aa
+
+    return orf_list
+
+
+def find_orf_max(seq: str, threshold: int, code_table_id: int) -> [ORF]:
+    """Give a list of all ORF in the sequence if they are grater than the threshold.
+       NCBI version so only gives biggest ORFs.
+
+            This function is written by Théo Gauvrit.
+
+            Args:
+                seq: Sequence to analyse
+                threshold: Minimum size of the ORF in the list
+                code_table_id: NCBI identifier of the translation table used on this sequence
+
+            Returns:
+                list of ORF
+        """
+    transl_table, start_table = get_genetic_code(code_table_id)
+
+    length = len(seq)
+    strands = {1: seq, -1: reversed_complement(seq)}
+    orf_list = []
+    for strand in strands:
+        inits = []
+        for i in range(length):
+            if strands[strand][i:i + 3] in start_table:
+                inits.append(i)
+        list_stop = []
+        for init in inits:
+            prot = "M"
+            for i in range(init + 3, length, 3):
+                codon = strands[strand][i: i + 3]
+                if len(codon) == 3:
+                    aa = transl_table[codon]
+                    if aa == "*":
+                        if i - init >= threshold and i not in list_stop:
+                            list_stop.append(i)
+                            if strand > 0:
+                                init += 1
+                                orf_list.append(ORF(start=init,
+                                                    stop=i + 3,
+                                                    frame=init % 3 + 1,
+                                                    protein=prot))
+                            else:
+                                orf_list.append(ORF(start=length - (i + 2),
+                                                    stop=length - init,
+                                                    frame=-1 * ((init - 1) % 3 + 1),
+                                                    protein=prot))
+                            break
+                        else:
+                            break
+                    prot += aa
+
+    return orf_list
+
+
+def get_lengths(orf_list: list) -> [int]:
+    """Give the list of orf lengths from a list of orf
+
+        This function is written by Mélissa Sadouki.
+
+        Args:
+            orf_list: list of ORF.
+
+        Returns:
+            list of lengths of ORF
+        """
+    return [len(orf) for orf in orf_list]
+
+
+def get_longest_orf(orf_list: List[ORF]) -> ORF:
+    """Give the longest orf from a list of orf
+
+            This function is written by Mélissa Sadouki.
+
+            Args:
+                orf_list: list of ORF.
+
+            Returns:
+                longest ORF
+        """
+    return max(orf_list, key=lambda orf: len(orf))
+
+
+def get_top_longest_orf(orf_list: List[ORF], value: float) -> [ORF]:
+    """Return the value% top longest orfs from a list of orf
+
+            This function is written by Mélissa Sadouki.
+
+            Args:
+                orf_list: list of ORF.
+                value: 0 > float > 1 : % of the top longest orf to show
+
+            Returns:
+                list of top ORF
+        """
+    orf_list.sort(key=lambda orf: len(orf))
+    return orf_list[int(- value * len(orf_list)) - 1:]
+
+
+def compare(orf_list_1: Iterable[ORF], orf_list_2: Iterable[ORF]) -> {ORF}:
+    """Compare two iterables containing ORFs.
+    Two ORFs are considered as identical if they have the same frame,
+    the same starting position, the same stop position, and the same protein sequence produced.
+        This function is written by Eliot Ragueneau.
+
+                    Args:
+                        orf_list_1: list or any iterable containing ORF objects
+                        orf_list_2: list or any iterable containing ORF objects
+
+                    Returns:
+                        intersections of the two sets"""
+    orf_set_1 = {orf.comparable_attributes for orf in orf_list_1}
+    orf_set_2 = {orf.comparable_attributes for orf in orf_list_2}
+    return [ORF(*orf) for orf in orf_set_1.intersection(orf_set_2)]
+
+
+def read_csv(filename: str, separator: str = ";") -> [dict]:
+    """Read a csv file delimited by separator
+
+            This function is written by Eliot Ragueneau.
+
+            Args:
+                filename: .csv file to read
+                separator: separator between data in the csv file
+
+            Returns:
+                list of dictionary of features:
+                    [
+                     {colonne 1: element 1, colonne 2: element 2}
+                     {colonne 1: element 3, colonne 2: element 4}
+                     {colonne 1: element 5, colonne 2: element 6}
+                     {colonne 1: element 7, colonne 2: element 8}
+                    ]
+        """
+    with open(filename, 'r') as file:
+        list_lines = [line.strip() for line in file.readlines()]
+        keys = list_lines[0].split(separator)
+        return [{key: element for key in keys for element in line.split(separator)} for line in list_lines[1:]]
+
+
+def write_csv(filename: str, data: list, separator: str = ";"):
+    """Write a csv file delimited by separator from a list of dictionary
+
+                    This function is written by Eliot Ragueneau.
+
+                    Args:
+                        filename: .csv file to read
+                        data: list of dict where each dict is a line in the product file,
+                                                and their keys the first row of the file
+                        separator: separator between data in the csv file
+
+                    Returns:
+                        None
+                """
+    if isinstance(data[0], ORF):
+        data = [orf.as_dict() for orf in data]
+    filename += ".csv" if filename[-4:] != ".csv" else ""
+    with open(filename, "w") as file:
+        file.write("{}\n".format(separator.join(data[0])))  # Write only the keys
+        for dictionary in data:
+            file.write("{}\n".format(separator.join([str(dictionary[key]) for key in dictionary])))
 
 
 if __name__ == '__main__':
